@@ -18,7 +18,7 @@ namespace manger
       
         Form_setting _form_setting = new Form_setting();
         
-        //مجموع الحساب الذي سيعرض 
+        //مجموع الحساب الذي سيعرض للمستخدم
         
         public Form1()
         {
