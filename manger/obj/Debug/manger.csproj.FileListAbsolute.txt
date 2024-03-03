@@ -1,0 +1,15 @@
+E:\project\project vs2020\manger\manger\bin\Debug\manger.exe.config
+E:\project\project vs2020\manger\manger\bin\Debug\manger.exe
+E:\project\project vs2020\manger\manger\bin\Debug\manger.pdb
+E:\project\project vs2020\manger\manger\obj\Debug\manger.csproj.AssemblyReference.cache
+E:\project\project vs2020\manger\manger\obj\Debug\manger.csproj.SuggestedBindingRedirects.cache
+E:\project\project vs2020\manger\manger\obj\Debug\manger.Form1.resources
+E:\project\project vs2020\manger\manger\obj\Debug\manger.Properties.Resources.resources
+E:\project\project vs2020\manger\manger\obj\Debug\manger.csproj.GenerateResource.cache
+E:\project\project vs2020\manger\manger\obj\Debug\manger.csproj.CoreCompileInputs.cache
+E:\project\project vs2020\manger\manger\obj\Debug\manger.exe
+E:\project\project vs2020\manger\manger\obj\Debug\manger.pdb
+E:\project\project vs2020\manger\manger\obj\Debug\manger.Form_setting.resources
+E:\project\project vs2020\manger\manger\obj\Debug\manger.Form_buy.resources
+E:\project\project vs2020\manger\manger\obj\Debug\manger.Form_show_mng.resources
+E:\project\project vs2020\manger\manger\obj\Debug\manger._add_mng_form.resources
