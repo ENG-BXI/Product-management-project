@@ -32,7 +32,7 @@ namespace manger
             // حتى يسهل الاسخدام لتحريك التاب من مكان الكتابة الى زر add وهذا كلة بزر enter
             _name_mng.TabIndex += 1;
             // اتصال بيانات لتعبة الجدول الفرعي
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+"mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
             SqlConnection con = new SqlConnection(cs_h);
             //يعطي اشارة اذا اراد المستخدم الاضافة ومربع النص فاضي 
             if (_name_mng.Text != "" && _id_mng.Text != "")
@@ -54,8 +54,9 @@ namespace manger
                 try
                 {
                     string query = "insert into home_tb (name_h_mng,id_h_mng,price_h_mng,number_mng) values (" + "'" +BXI_tool.name + "'," + BXI_tool.id + "," + BXI_tool.price + "," + BXI_tool._number_mng_v + ")";
+                    
                     SqlCommand com = new SqlCommand(query, con);
-                    con.Open();
+                    con.Open();  
                     com.ExecuteNonQuery();
                     BXI_tool._can_delete = true;
                     BXI_tool._v_to_stop_delete += 1;
@@ -79,7 +80,7 @@ namespace manger
 
         private void _delete_Click(object sender, EventArgs e)
         {
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\abdalrhman muneer\Documents\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
             SqlConnection con = new SqlConnection(cs_h);
             
             // 
@@ -119,7 +120,7 @@ namespace manger
         {
             if (BXI_tool._can_delete)
             {
-                string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\abdalrhman muneer\Documents\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+                string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
                 SqlConnection con = new SqlConnection(cs_h);
                 //متغيرات للاضافة
 
@@ -153,7 +154,7 @@ namespace manger
         //الدالة الخاصة بالتحديث للجدول الفرعي
         public void _refresh()
         {
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\abdalrhman muneer\Documents\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
             SqlConnection con = new SqlConnection(cs_h);
             //لاضافة البيانات الى القاعدة الثانية الخاصة بالمشتري 
             SqlCommand com = new SqlCommand("select * from home_tb ", con);
@@ -202,7 +203,7 @@ namespace manger
             if (_id_mng.Text != ".")
             {
                 // يستخدم القاعدة العامة
-                string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\abdalrhman muneer\Documents\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+                string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
                 SqlConnection con = new SqlConnection(cs);
                 SqlCommand com = new SqlCommand("SELECT * from home_mng_db where id_mng like '%" + _id_mng.Text + "%'", con);
                 con.Open();
@@ -242,7 +243,7 @@ namespace manger
                         try
                         {
                             // يستخدم القاعدة العامة
-                            string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\abdalrhman muneer\Documents\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+                            string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
                             SqlConnection con = new SqlConnection(cs);
                             SqlCommand com = new SqlCommand("SELECT * from home_mng_db where name_mng like '%" + _name_mng.Text + "%'", con);
                             con.Open();
@@ -300,7 +301,7 @@ namespace manger
                 if (_id_mng.Text != ".")
                 {
                     // يستخدم القاعدة العامة
-                    string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\abdalrhman muneer\Documents\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+                    string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
                     SqlConnection con = new SqlConnection(cs);
                     SqlCommand com = new SqlCommand("SELECT * from home_mng_db where id_mng like '%" + _id_mng.Text + "%'", con);
                     con.Open();
@@ -385,7 +386,7 @@ namespace manger
         }
         static public void cls()
         {
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\abdalrhman muneer\Documents\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
             SqlConnection con = new SqlConnection(cs_h);
             //متغيرات للاضافة
             try
