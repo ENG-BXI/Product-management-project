@@ -20,15 +20,15 @@ namespace manger
 
         private void Form_buy_Load(object sender, EventArgs e)
         {
-            _price_all_form_buy.Text = BXI_tool._total.ToString();
+            _price_all_form_buy.Text = My_tool._total.ToString();
         }
 
         private void _paid_up_form_buy_TextChanged(object sender, EventArgs e)
         {
             try
             {
-                int _paid_up = Convert.ToInt16(_paid_up_form_buy.Text);
-                _paid_up -= Convert.ToInt16(_price_all_form_buy.Text);
+                double _paid_up = Convert.ToDouble(_paid_up_form_buy.Text);
+                _paid_up -= Convert.ToDouble(_price_all_form_buy.Text);
                 _Residual_form_buy.Text = _paid_up.ToString();
             }catch
             {

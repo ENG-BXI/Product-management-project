@@ -15,7 +15,8 @@ namespace manger
     
     public partial class Form1 : Form
     {
-      
+        public static string cs_h;
+
         Form_setting _form_setting = new Form_setting();
         
         //مجموع الحساب الذي سيعرض للمستخدم
@@ -23,8 +24,10 @@ namespace manger
         public Form1()
         {
             InitializeComponent();
+            cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + Application.StartupPath + @"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
+
             // تم وضع المسح هنا حتى ينظف قاعدة البيانات الفرعية 
-            BXI_tool. cls();
+            My_tool. cls(cs_h);
 
         }
         public void _add_Click(object sender, EventArgs e)
@@ -32,18 +35,22 @@ namespace manger
             // حتى يسهل الاسخدام لتحريك التاب من مكان الكتابة الى زر add وهذا كلة بزر enter
             _name_mng.TabIndex += 1;
             // اتصال بيانات لتعبة الجدول الفرعي
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
             SqlConnection con = new SqlConnection(cs_h);
             //يعطي اشارة اذا اراد المستخدم الاضافة ومربع النص فاضي 
             if (_name_mng.Text != "" && _id_mng.Text != "")
             {
                 try
                 { //تحويل القيم من مربع النص الى  المتغيرات لاضافتها في قواعد البيانات 
-                    BXI_tool.id = Convert.ToInt32(_id_mng.Text);
-                    BXI_tool.name = _name_mng.Text;
-                    BXI_tool.price = Convert.ToDouble(_price_mng.Text);
-                    BXI_tool._number_mng_v = Convert.ToInt16(_number_mng.Text);
-                    BXI_tool.price = BXI_tool.price * BXI_tool._number_mng_v;
+                    My_tool.id = Convert.ToInt32(_id_mng.Text);
+                    My_tool.name = _name_mng.Text;
+                    My_tool.price = Convert.ToDouble(_price_mng.Text);
+                    //لحساب المجموع لمنتج الواحد 
+                    // مثال
+                    // سعر الكتاب مثلا 1000 
+                    //لو قلنا 5 كتب 
+                    //سيقوم بالضرب قي 5 ويكون الناتج 5000
+                    My_tool._number_mng = Convert.ToInt16(_number_mng.Text);
+                    My_tool.price = My_tool.price * My_tool._number_mng;
                 }
                 catch
                 {
@@ -53,13 +60,13 @@ namespace manger
                 } // catch 1
                 try
                 {
-                    string query = "insert into home_tb (name_h_mng,id_h_mng,price_h_mng,number_mng) values (" + "'" +BXI_tool.name + "'," + BXI_tool.id + "," + BXI_tool.price + "," + BXI_tool._number_mng_v + ")";
+                    string query = "insert into home_tb (name_h_mng,id_h_mng,price_h_mng,number_mng) values (" + "'" + My_tool.name + "'," + My_tool.id + "," + My_tool.price + "," + My_tool._number_mng + ")";
                     
                     SqlCommand com = new SqlCommand(query, con);
                     con.Open();  
                     com.ExecuteNonQuery();
-                    BXI_tool._can_delete = true;
-                    BXI_tool._v_to_stop_delete += 1;
+                    My_tool._can_delete = true;
+                    My_tool.numperProduct_to_stop_delete += 1;
                 }
                 catch (Exception)
                 {
@@ -77,19 +84,21 @@ namespace manger
                 MessageBox.Show("قم بادخال العنصر اولا");
 
         } //_add_Click
-
+        // زر حدف منتج
         private void _delete_Click(object sender, EventArgs e)
         {
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
             SqlConnection con = new SqlConnection(cs_h);
-            
-            // 
-            BXI_tool._can_delete = BXI_tool._v_to_stop_delete == 0 ? false :  true;
+
+            // يفحص هل المنتاج موجوده ليسند للمتغير انه يمكنه الجذف 
+            // و الا 
+            //يعطي له رساله بانه لا يمكن له الحدف
+
+            My_tool._can_delete = My_tool.numperProduct_to_stop_delete == 0 ? false :  true;
 
             try
             {
 
-                if (BXI_tool._can_delete)
+                if (My_tool._can_delete)
                 {
                     // يقوم بحدف المنتج المحدد من الجدول الفرعي باستخدام 
                     //_dataGridView_home.CurrentRow.Cells[1].Value
@@ -100,9 +109,9 @@ namespace manger
                     con.Open();
                     com.ExecuteNonQuery();
                     // انقاص واحد لكي يعمل على ايقاف الحدف بعد حدف الكل 
-                    BXI_tool._v_to_stop_delete -= 1;
-                    if (BXI_tool._v_to_stop_delete == 0)
-                        BXI_tool._can_delete = false;
+                    My_tool.numperProduct_to_stop_delete -= 1;
+                    if (My_tool.numperProduct_to_stop_delete == 0)
+                        My_tool._can_delete = false;
                 }
                 else
                     MessageBox.Show("لايوجد شي لحدفة"); 
@@ -111,16 +120,17 @@ namespace manger
             {
                 MessageBox.Show("هنالك مشكلة في الاتصال بالبيانات ");
             }
-            
+            // بعد كل عمليه حدف يقوم بعمل تحديث للبيانات لجلب البيانات الجديده
+            //ويقوم ايضا بحساب السعر بعد الحدف 
             _refresh();
             _sum_total();
 
         }//_delete_Click
+        // زر حدف الكل
         private void _delete_all_Click(object sender, EventArgs e)
         {
-            if (BXI_tool._can_delete)
+            if (My_tool._can_delete)
             {
-                string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
                 SqlConnection con = new SqlConnection(cs_h);
                 //متغيرات للاضافة
 
@@ -132,10 +142,10 @@ namespace manger
                     com.ExecuteNonQuery();
                     // بعد حدف الجميع يمنع الحدف وذلك بجعل المتغير الخاصة به ب
                     //false
-                    BXI_tool._can_delete = false;
+                    My_tool._can_delete = false;
                     //حتى يتم تفعيل الشرط في الاعلى 
-                    //_can_delete = false becouse _v_to_stop_delete = 0
-                    BXI_tool._v_to_stop_delete = 0; 
+                    //_can_delete = false becouse numperProduct_to_stop_delete = 0
+                    My_tool.numperProduct_to_stop_delete = 0; 
                 }
                 catch (Exception)
                 {
@@ -151,11 +161,122 @@ namespace manger
             }
 
         }
+        // زر نافذة الاعدادات
+        private void _Settings_home_Click(object sender, EventArgs e)
+        {
+            // نافذة الاعدادات
+            _form_setting.Show();
+        }
+        //زر نافذه الدفع
+        private void _ok_Click(object sender, EventArgs e)
+        {
+            Form_buy _form_buy = new Form_buy();
+            //نافذة المحاسبة الاخيرة والدفع 
+            _form_buy.Show();
+        }
+        //عند الضغط على انتر ليعمل على اكمال معلومات المنتج تلقائيا
+        private void _id_mng_Leave(object sender, EventArgs e)
+        {
+            if (_id_mng.Text != ".")
+            {
+              
+                SqlConnection con = new SqlConnection(cs_h);
+                SqlCommand com = new SqlCommand("SELECT * from home_mng_db where id_mng like '%" + _id_mng.Text + "%'", con);
+                con.Open();
+                SqlDataReader dr = com.ExecuteReader();
+                dr.Read();
+                //بقوم بتبئة مربعات النص الخاصة بالاسم والرقم والسعر من خلال كتابة احرف الاسم الاولى
+                _name_mng.Text = dr["name_mng"].ToString();
+                _id_mng.Text = dr["id_mng"].ToString();
+                _price_mng.Text = dr["price_mng"].ToString();
+                con.Close();
+            }
+            else
+            {
+                //اذا تم الضغط على "." ستظهر نافدة المنتجات لتحديد الاسم المناسب
+                Form_show_mng _show_Mng = new Form_show_mng(cs_h);
+                _show_Mng.Show();
+                _name_mng.Clear();
+            }
+
+        }
+        //عند الضغط على انتر ليعمل على اكمال معلومات المنتج تلقائيا
+        private void _name_mng_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //هل الزر المضغوط هو انتر
+            if (e.KeyChar == 13)
+            {
+                if (_name_mng.Text == ".")
+                {
+                    //اذا تم الضغط على "." ستظهر نافدة المنتجات لتحديد الاسم المناسب
+                    Form_show_mng _show_Mng = new Form_show_mng(cs_h);
+                    _show_Mng.Show();
+                    _name_mng.Clear();
+                }
+                else
+                {
+                    if(_name_mng.Text != "")
+                    {
+                        try
+                        {
+                                                    // يستخدم القاعدة العامة
+                        SqlConnection con = new SqlConnection(cs_h);
+                            SqlCommand com = new SqlCommand("SELECT * from home_mng_db where name_mng like '%" + _name_mng.Text + "%'", con);
+                            con.Open();
+                            SqlDataReader dr = com.ExecuteReader();
+                            dr.Read();
+                            // بقوم بتبئة مربعات النص الخاصة بالاسم والرقم والسعر من خلال كتابة احرف الاسم الاولى
+                            _name_mng.Text = dr["name_mng"].ToString();
+                            _id_mng.Text = dr["id_mng"].ToString();
+                            _price_mng.Text = dr["price_mng"].ToString();
+                            con.Close();
+                            //اذا لم يحدد رقم يجعل الرقم التلقائي 1 
+                            _number_mng.Text = "1";
+
+                            //تعمل على الانتقال الى زر الاضافة 
+                            SendKeys.Send("{tab}");
+
+
+                        }
+                        catch
+                        {
+                            MessageBox.Show("تاكد من كتابة المنتج بشكل صحيح");
+                        }
+                    }//if != ""
+                    else
+                    {
+                        MessageBox.Show("لايمكن ان يكون الحقل فارغا");
+                    }
+                }//if != "."
+            }
+        }
+        //عند الاقفال يقوم بمسح الجدول الفرعي وعمل تحديث 
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+           My_tool.cls(cs_h);
+            _refresh();
+        }
+        //تعبئة مربعات النص من خلال تحديد المنتج في الجدول الفرعي
+        private void _dataGridView_home_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                //تعبئة مربعات النص من خلال تحديد المنتج في الجدول الفرعي
+                _name_mng.Text = _dataGridView_home.Rows[e.RowIndex].Cells[0].Value.ToString().Trim();
+                _id_mng.Text = _dataGridView_home.Rows[e.RowIndex].Cells[1].Value.ToString().Trim();
+                _price_mng.Text = _dataGridView_home.Rows[e.RowIndex].Cells[2].Value.ToString().Trim();
+                _number_mng.Text = _dataGridView_home.Rows[e.RowIndex].Cells[3].Value.ToString().Trim();
+
+            }
+            catch
+            {}
+            
+           
+        }
+
         //الدالة الخاصة بالتحديث للجدول الفرعي
         public void _refresh()
-        {
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
-            SqlConnection con = new SqlConnection(cs_h);
+        {           SqlConnection con = new SqlConnection(cs_h);
             //لاضافة البيانات الى القاعدة الثانية الخاصة بالمشتري 
             SqlCommand com = new SqlCommand("select * from home_tb ", con);
             con.Open();
@@ -186,112 +307,7 @@ namespace manger
             _name_mng.Clear();
             _id_mng.Clear();
             _price_mng.Clear();
-        }
-        private void _Settings_home_Click(object sender, EventArgs e)
-        {
-            // نافذة الاعدادات
-            _form_setting.Show();
-        }
-        private void _ok_Click(object sender, EventArgs e)
-        {
-            Form_buy _form_buy = new Form_buy();
-            //نافذة المحاسبة الاخيرة والدفع 
-            _form_buy.Show();
-        }
-        private void _id_mng_Leave(object sender, EventArgs e)
-        {
-            if (_id_mng.Text != ".")
-            {
-                // يستخدم القاعدة العامة
-                string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
-                SqlConnection con = new SqlConnection(cs);
-                SqlCommand com = new SqlCommand("SELECT * from home_mng_db where id_mng like '%" + _id_mng.Text + "%'", con);
-                con.Open();
-                SqlDataReader dr = com.ExecuteReader();
-                dr.Read();
-                //بقوم بتبئة مربعات النص الخاصة بالاسم والرقم والسعر من خلال كتابة احرف الاسم الاولى
-                _name_mng.Text = dr["name_mng"].ToString();
-                _id_mng.Text = dr["id_mng"].ToString();
-                _price_mng.Text = dr["price_mng"].ToString();
-                con.Close();
-            }
-            else
-            {
-                //اذا تم الضغط على "." ستظهر نافدة المنتجات لتحديد الاسم المناسب
-                Form_show_mng _show_Mng = new Form_show_mng();
-                _show_Mng.Show();
-                _name_mng.Clear();
-            }
-
-        }
-        private void _name_mng_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            //هل الزر المضغوط هو انتر
-            if (e.KeyChar == 13)
-            {
-                if (_name_mng.Text == ".")
-                {
-                    //اذا تم الضغط على "." ستظهر نافدة المنتجات لتحديد الاسم المناسب
-                    Form_show_mng _show_Mng = new Form_show_mng();
-                    _show_Mng.Show();
-                    _name_mng.Clear();
-                }
-                else
-                {
-                    if(_name_mng.Text != "")
-                    {
-                        try
-                        {
-                            // يستخدم القاعدة العامة
-                            string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
-                            SqlConnection con = new SqlConnection(cs);
-                            SqlCommand com = new SqlCommand("SELECT * from home_mng_db where name_mng like '%" + _name_mng.Text + "%'", con);
-                            con.Open();
-                            SqlDataReader dr = com.ExecuteReader();
-                            dr.Read();
-                            // بقوم بتبئة مربعات النص الخاصة بالاسم والرقم والسعر من خلال كتابة احرف الاسم الاولى
-                            _name_mng.Text = dr["name_mng"].ToString();
-                            _id_mng.Text = dr["id_mng"].ToString();
-                            _price_mng.Text = dr["price_mng"].ToString();
-                            con.Close();
-                            //اذا لم يحدد رقم يجعل الرقم التلقائي 1 
-                            _number_mng.Text = "1";
-
-                            //تعمل على الانتقال الى زر الاضافة 
-                            SendKeys.Send("{tab}");
-
-
-                        }
-                        catch
-                        {
-                            MessageBox.Show("تاكد من كتابة المنتج بشكل صحيح");
-                        }
-                    }//if != ""
-                    else
-                    {
-                        MessageBox.Show("لايمكن ان يكون الحقل فارغا");
-                    }
-                }//if != "."
-            }
-        }//_name_mng_KeyPress
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            BXI_tool.cls();
-            _refresh();
-        }
-        private void _dataGridView_home_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            try
-            {
-                //تعبئة مربعات النص من خلال تحديد المنتج في الجدول الفرعي
-                _name_mng.Text = _dataGridView_home.Rows[e.RowIndex].Cells["name_h_mng"].Value.ToString().Trim();
-                _id_mng.Text = _dataGridView_home.Rows[e.RowIndex].Cells["id_h_mng"].Value.ToString().Trim();
-                _price_mng.Text = _dataGridView_home.Rows[e.RowIndex].Cells["price_h_mng"].Value.ToString().Trim();
-            }
-            catch
-            {}
-            
-           
+            _number_mng.Clear();    
         }
         private void _id_mng_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -301,8 +317,7 @@ namespace manger
                 if (_id_mng.Text != ".")
                 {
                     // يستخدم القاعدة العامة
-                    string cs = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
-                    SqlConnection con = new SqlConnection(cs);
+                 SqlConnection con = new SqlConnection(cs_h);
                     SqlCommand com = new SqlCommand("SELECT * from home_mng_db where id_mng like '%" + _id_mng.Text + "%'", con);
                     con.Open();
                     SqlDataReader dr = com.ExecuteReader();
@@ -320,7 +335,7 @@ namespace manger
                     if(_id_mng.Text != "")
                     {
                         //اذا تم الضغط على "." ستظهر نافدة المنتجات لتحديد الاسم المناسب
-                        Form_show_mng _show_Mng = new Form_show_mng();
+                        Form_show_mng _show_Mng = new Form_show_mng(cs_h);
                         _show_Mng.Show();
                         _name_mng.Clear(); 
                     }
@@ -339,7 +354,7 @@ namespace manger
                 _total_local += Convert.ToDouble(_dataGridView_home.Rows[i].Cells[2].Value);
             }
             _price_all.Text = _total_local.ToString();
-            BXI_tool._total = _total_local;
+            My_tool._total = _total_local;
         }
         private void pictureBox1_Click(object sender, EventArgs e)
         {
@@ -356,24 +371,24 @@ namespace manger
 
         private void _dataGridView_home_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
+          
         }
 
        
     }//Form1
 
     // كلاس خاص بالمتغيرات والدوال الخارجية
-    public class BXI_tool
+    public class My_tool
     {
-      static  public int        id;
-      static  public string     name;
-      static  public double     price;
-      static  public bool       _can_delete = false;
-      static  public int        _v_to_stop_delete = 0;
+        static public int id;
+        static public string name;
+        static public double price;
+        static public bool _can_delete = false;
+        static public int numperProduct_to_stop_delete = 0;
       static  public int        _number_price_all;
       static  public int        _number_del = -1;
       static  public double     _total;
-      static  public int        _number_mng_v;
+      static  public int        _number_mng;
 
         //لسته لاضافة الاسعار للمشتري حتى يتم جمعها وحسا الناتج النهائي
         static public List<string> _v_use_sum_all = new List<string>();
@@ -384,17 +399,16 @@ namespace manger
                 SendKeys.Send("{tab}");
             }
         }
-        static public void cls()
+        static public void cls(string cs_h)
         {
-            string cs_h = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="+Application.StartupPath+@"\mng_db.mdf;Integrated Security=True;Connect Timeout=30";
-            SqlConnection con = new SqlConnection(cs_h);
+           SqlConnection connection = new SqlConnection(cs_h);
             //متغيرات للاضافة
             try
             {
                 string query = "delete from home_tb";
-                SqlCommand com = new SqlCommand(query, con);
-                con.Open();
-                com.ExecuteNonQuery();
+                SqlCommand command = new SqlCommand(query, connection);
+                connection.Open();
+                command.ExecuteNonQuery();
             }
             catch (Exception)
             {
